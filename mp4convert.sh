@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 INPUT='*'
-CODEC='libx264'
+CODEC='-c copy -c:a libfdk_aac -c:v libx264'
 PROFILE='high'
 PRESET='medium'
 TUNE='animation'
@@ -14,18 +14,18 @@ FILTER='-vf format=yuv420p'
 
 print_help()
 {
-	echo 'usage:
-		i)	INPUT="$OPTARG";;
-		f)	INPUT="*.$OPTARG";;
-		v)	FILTER="-vf $OPTARG";;
-		c)	CODEC="$OPTARG";;
-		p)	PROFILE="$OPTARG";;
-		s)	PRESET="$OPTARG";;
-		t)	TUNE="$OPTARG";;
-		q)	CRF="$OPTARG";;
-		o)	OUTPUT="$OPTARG";;
-		x)	TXFORMAT="$OPTARG";;
-	'
+	echo "usage:
+		i)	INPUT='$INPUT'
+		f)	INPUT='*.$INPUT'
+		v)	FILTER='$FILTER'
+		c)	CODEC='$CODEC'
+		p)	PROFILE='$PROFILE'
+		s)	PRESET='$PRESET'
+		t)	TUNE='$TUNE'
+		q)	CRF='$CRF'
+		o)	OUTPUT='$OUTPUT'
+		x)	TXFORMAT='$TXFORMAT'
+	"
 }
 
 while getopts i:e:f:c:p:s:t:q:o:x: OPT
@@ -59,7 +59,7 @@ do
 		if [[ -n "${TXFORMAT}" ]]; then
 			ffmpeg -y -i "${file}" -c copy "${TMP}/${TARGET}"
 		else
-			ffmpeg -y -vsync passthrough -i "${file}" -threads ${THREADS} -vsync vfr ${FILTER} -c:a libfdk_aac -c:v ${CODEC} -profile:v ${PROFILE} -preset ${PRESET} -tune ${TUNE} -crf ${CRF} ${FLAGS} "${TMP}/${TARGET}"
+			ffmpeg -y -i "${file}" -threads ${THREADS} -fps_mode vfr ${FILTER} ${CODEC} -profile:v ${PROFILE} -preset ${PRESET} -tune ${TUNE} -crf ${CRF} ${FLAGS} "${TMP}/${TARGET}"
 		fi
 		mv "${TMP}/$TARGET" "${OUTPUT}/" &
 	fi
