@@ -1,8 +1,8 @@
 #!/bin/bash -x
 
 INPUT='*'
-CODEC='-c copy -c:a libfdk_aac -c:v libx264'
-PROFILE='high'
+ACODEC=''
+VCODEC='-c:v libx264 -profile:v high'
 PRESET='medium'
 TUNE='animation'
 CRF='22'
@@ -16,11 +16,11 @@ print_help()
 {
 	echo "usage:
 		i)	INPUT='$INPUT'
-		f)	INPUT='*.$INPUT'
-		v)	FILTER='$FILTER'
-		c)	CODEC='$CODEC'
-		p)	PROFILE='$PROFILE'
-		s)	PRESET='$PRESET'
+		e)	INPUT='*.$INPUT'
+		f)	FILTER='$FILTER'
+		a)	ACODEC='$ACODEC'
+		v)	VCODEC='$VCODEC'
+		p)	PRESET='$PRESET'
 		t)	TUNE='$TUNE'
 		q)	CRF='$CRF'
 		o)	OUTPUT='$OUTPUT'
@@ -28,19 +28,21 @@ print_help()
 	"
 }
 
-while getopts i:e:f:c:p:s:t:q:o:x: OPT
+while getopts i:e:f:a:v:p:t:q:o:x:m OPT
 do
+	echo "${OPTARG[@]}"
 	case $OPT in
 		i)	INPUT="$OPTARG";;
-		f)	INPUT="*.$OPTARG";;
-		v)	FILTER="-vf $OPTARG";;
-		c)	CODEC="$OPTARG";;
-		p)	PROFILE="$OPTARG";;
-		s)	PRESET="$OPTARG";;
+		e)	INPUT="*.$OPTARG";;
+		f)	FILTER="$OPTARG";;
+		a)	ACODEC="$OPTARG";;
+		v)	VCODEC="$OPTARG";;
+		p)	PRESET="$OPTARG";;
 		t)	TUNE="$OPTARG";;
 		q)	CRF="$OPTARG";;
 		o)	OUTPUT="$OPTARG";;
 		x)	TXFORMAT="$OPTARG";;
+		m)	OUTPUT="m4a";;
 		?)	print_help; exit 2;;
 	esac
 done
@@ -50,6 +52,10 @@ mkdir -p $TMP
 
 if [[ -n "${TXFORMAT}" ]]; then
 	OUTPUT="${TXFORMAT}"
+elif [ "${OUTPUT}" == "m4a" ]; then
+	VCODEC=''
+	FILTER=''
+	ACODEC='-c:a libfdk_aac -vbr 5'
 fi
 
 for file in $INPUT
@@ -59,7 +65,7 @@ do
 		if [[ -n "${TXFORMAT}" ]]; then
 			ffmpeg -y -i "${file}" -c copy "${TMP}/${TARGET}"
 		else
-			ffmpeg -y -i "${file}" -threads ${THREADS} -fps_mode vfr ${FILTER} ${CODEC} -profile:v ${PROFILE} -preset ${PRESET} -tune ${TUNE} -crf ${CRF} ${FLAGS} "${TMP}/${TARGET}"
+			ffmpeg -y -i "${file}" -threads ${THREADS} -fps_mode vfr ${FILTER} -c copy ${ACODEC} ${VCODEC} -preset ${PRESET} -tune ${TUNE} -crf ${CRF} ${FLAGS} "${TMP}/${TARGET}"
 		fi
 		mv "${TMP}/$TARGET" "${OUTPUT}/" &
 	fi
