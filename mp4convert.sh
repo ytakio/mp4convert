@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-INPUT='*'
+INPUT=( * )
 ACODEC=''
 VCODEC='-c:v libx264 -profile:v high'
 PRESET='medium'
@@ -30,10 +30,9 @@ print_help()
 
 while getopts i:e:f:a:v:p:t:q:o:x:m OPT
 do
-	echo "${OPTARG[@]}"
 	case $OPT in
-		i)	INPUT="$OPTARG";;
-		e)	INPUT="*.$OPTARG";;
+		i)	INPUT=( "$OPTARG" );;
+		e)	INPUT=( *.$OPTARG );;
 		f)	FILTER="$OPTARG";;
 		a)	ACODEC="$OPTARG";;
 		v)	VCODEC="$OPTARG";;
@@ -58,7 +57,8 @@ elif [ "${OUTPUT}" == "m4a" ]; then
 	ACODEC='-c:a libfdk_aac -vbr 5'
 fi
 
-for file in $INPUT
+
+for file in "${INPUT[@]}";
 do
 	if [[ -f "${file}" ]]; then
 		TARGET="${file%.*}.${OUTPUT}"
