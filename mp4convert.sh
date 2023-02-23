@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 INPUT=( * )
-ACODEC=''
+ACODEC='-c:a libfdk_aac -vbr 5'
 VCODEC='-c:v libx264 -profile:v high'
 PRESET='medium'
 TUNE='animation'
